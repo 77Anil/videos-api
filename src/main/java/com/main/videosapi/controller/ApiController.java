@@ -3,6 +3,8 @@ package com.main.videosapi.controller;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,7 +33,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.main.videosapi.entity.Category;
@@ -85,6 +90,9 @@ public class ApiController {
 	@Autowired
 	private PasswordEncoder passEncoder;
 
+	@Autowired
+	BCryptPasswordEncoder bycrpt;
+
 	@PostMapping(path = "/Auth")
 	public ResponseEntity<?> authenticatePartner(@Valid @RequestBody Partner partner) {
 		Authentication authenticate = authManager
@@ -94,6 +102,14 @@ public class ApiController {
 		UserDetails user = userDetails.loadUserByUsername(partner.getUsername());
 		String token = jwttoken.generateToken(user);
 		return new ResponseEntity<Object>(new ResponseHandler(true, "", new JwtResponse(token)), HttpStatus.OK);
+
+	}
+
+	@PostMapping(path = "/mediaUpload/")
+	public ResponseEntity<?> upload(@RequestParam MultipartFile file) throws IllegalStateException, IOException {
+		String name = file.getOriginalFilename();
+		file.transferTo(new File("D:\\Dumps\\" + name));
+		return new ResponseEntity<Object>(new ResponseHandler(true, "", "uplaoded"), HttpStatus.OK);
 
 	}
 

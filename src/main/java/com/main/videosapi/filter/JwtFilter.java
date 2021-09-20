@@ -18,6 +18,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.main.videosapi.service.MyUserDetailsService;
 import com.main.videosapi.util.JwtUtils;
 
+import io.jsonwebtoken.ExpiredJwtException;
+
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -29,17 +31,24 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
+			throws ServletException, IOException, ExpiredJwtException {
 
 		final String authorizationHeader = request.getHeader("Authorization");
 		String token = null, username = null;
+
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			token = authorizationHeader.substring(7);
-			username = jwt.extractUsername(token);
+			try {
+				username = jwt.extractUsername(token);
+			} catch (ExpiredJwtException ex) {
+				request.setAttribute("expired", ex.getMessage());
+			}
+
 		}
 
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			UserDetails user = userDeatilsService.loadUserByUsername(username);
+
 			if (jwt.validateToken(token, user)) {
 				UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
 						user, null, user.getAuthorities());
