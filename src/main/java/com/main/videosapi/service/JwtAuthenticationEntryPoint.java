@@ -18,7 +18,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 			AuthenticationException authException) throws IOException, ServletException {
 		// TODO Auto-generated method stub
 		final String expired = (String) request.getAttribute("expired");
-		System.out.println(expired);
 		if (expired != null) {
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, expired);
 		} else {

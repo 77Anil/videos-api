@@ -9,6 +9,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +94,9 @@ public class ApiController {
 	@Autowired
 	BCryptPasswordEncoder bycrpt;
 
+	@Autowired
+	HttpServletResponse response;
+
 	@PostMapping(path = "/Auth")
 	public ResponseEntity<?> authenticatePartner(@Valid @RequestBody Partner partner) {
 		Authentication authenticate = authManager
@@ -117,7 +121,7 @@ public class ApiController {
 	public ResponseEntity<?> addPartner(@Valid @RequestBody Partner partner) throws Exception {
 
 		Optional<Partner> checkUser = partnerRepository.findByUsername(partner.getUsername());
-
+		System.out.println("Prestet");
 		if (checkUser.isPresent())
 			throw new Exception("Username Already Exists - " + partner.getUsername());
 
